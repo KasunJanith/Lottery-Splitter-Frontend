@@ -1,20 +1,21 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import UploadPage from './pages/UploadPage';
-import DashboardPage from './pages/DashboardPage';
-import AgentsPage from './pages/AgentsPage';
-import AgentSummaryPage from './pages/AgentSummaryPage';
+import OrderEntry from './pages/OrderEntry';
+import Assignment from './pages/Assignment';
+import Split from './pages/Split';
+import SplitDownload from './pages/SplitDownload';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Pages with sidebar layout */}
+        {/* All pages use the sidebar Layout */}
         <Route element={<Layout />}>
-          <Route path="/" element={<UploadPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/agents" element={<AgentsPage />} />
-          <Route path="/agent-summary" element={<AgentSummaryPage />} />
+          <Route path="/" element={<OrderEntry />} />
+          <Route path="/orders" element={<OrderEntry />} />
+          <Route path="/assign" element={<Assignment />} />
+          <Route path="/split" element={<Split />} />
+          <Route path="/download" element={<SplitDownload />} />
         </Route>
       </Routes>
     </BrowserRouter>

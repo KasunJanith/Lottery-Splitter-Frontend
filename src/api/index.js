@@ -1,8 +1,5 @@
 import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
-});
+const api = axios.create({ baseURL: 'http://localhost:8000/api/v1' });
 
 export const uploadArchive = (file) => {
   const formData = new FormData();
@@ -11,13 +8,19 @@ export const uploadArchive = (file) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
-
-export const splitLottery = (data) => {
-  // data: { session_id, lottery_name, draw_number, assignments: [{agent_name, count}] }
-  return api.post('/split', data, {
-    headers: { 'Content-Type': 'application/json' },
-  });
-};
-
-export const downloadZip = (sessionId) =>
-  api.get(`/download-zip/${sessionId}`, { responseType: 'blob' });
+export const getOrders = (date) => api.get(`/orders/${date}`);
+export const saveOrders = (data) => api.post('/orders', data);
+export const getAssignments = (date) => api.get(`/assignments/${date}`);
+export const saveAssignments = (data) => api.post('/assignments', data);
+export const splitForAgent = (data) => api.post('/split-for-agent', data);
+export const listAgentSplits = (sessionId, agentName) => api.get(`/agent-splits/${sessionId}/${agentName}`);
+export const downloadFile = (sessionId, filename) => api.get(`/download-file/${filename}?session=${sessionId}`, { responseType: 'blob' });
+export const downloadAgentZip = (sessionId, agentName) => api.get(`/download-agent-zip/${sessionId}/${agentName}`, { responseType: 'blob' });
+export const getLatestOrderDate = () => api.get('/orders/latest');
+export const getAssignedCounts = (agentName, assignmentDate) =>
+  api.get('/assigned-counts', { params: { agent_name: agentName, assignment_date: assignmentDate } });
+export const getDrawNumbers = (date) => api.get(`/draw-numbers/${date}`);
+export const getSessionByDate = (date) => api.get('/sessions/by-date', { params: { date } });
+export const getSessionLotteries = (sessionId) => api.get(`/sessions/${sessionId}/lotteries`);
+export const getSplitsByDate = (agentName, date) =>
+  api.get('/splits-by-date', { params: { agent_name: agentName, date } });
