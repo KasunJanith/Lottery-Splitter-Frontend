@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getOrders, saveOrders, getLatestOrderDate, getDrawNumbers } from '../api';
-
+import DateInput from '../components/DateInput';
+import { formatDate } from '../utils/dateUtils';
 const LOTTERIES = [
   { code: 'ada', name: 'Ada Sampatha' },
   { code: 'dana', name: 'Dhana Nidhanaya' },
@@ -99,15 +100,13 @@ const OrderEntry = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Order Entry</h1>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Draw Date</label>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={e => setSelectedDate(e.target.value)}
-          className="mt-1 block w-64 rounded-lg border-gray-300 shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-        />
-      </div>
+      <div className="mb-4 flex items-end gap-4">
+  <div>
+    <label className="block text-sm font-medium text-gray-700">Draw Date</label>
+    <DateInput selectedDate={selectedDate} onChange={setSelectedDate} />
+  </div>
+  
+</div>
       {selectedDate && (
         <>
           <button

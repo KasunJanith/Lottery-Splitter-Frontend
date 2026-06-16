@@ -24,3 +24,4 @@ export const getSessionByDate = (date) => api.get('/sessions/by-date', { params:
 export const getSessionLotteries = (sessionId) => api.get(`/sessions/${sessionId}/lotteries`);
 export const getSplitsByDate = (agentName, date) =>
   api.get('/splits-by-date', { params: { agent_name: agentName, date } });
+export const getDashboardStats = () => api.get('/dashboard/stats');

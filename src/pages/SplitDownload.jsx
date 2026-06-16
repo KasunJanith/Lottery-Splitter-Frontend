@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getSplitsByDate, downloadFile, downloadAgentZip, getLatestOrderDate } from '../api';
 import { formatDate } from '../utils/dateUtils';
+import DateInput from '../components/DateInput';
 
 const SplitDownload = () => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -72,12 +73,10 @@ const SplitDownload = () => {
       <div className="flex gap-6 mb-6 items-end">
         <div>
           <label className="block text-sm font-medium text-gray-700">Date</label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="mt-1 w-64 rounded-lg border-gray-300 shadow-sm"
-          />
+          <DateInput selectedDate={selectedDate} onChange={setSelectedDate} />
+        </div>
+        <div className="text-sm text-gray-600 self-end mb-1">
+          
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Agent</label>

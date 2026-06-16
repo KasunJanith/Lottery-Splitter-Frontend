@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAssignments, saveAssignments, getLatestOrderDate } from '../api';
+import DateInput from '../components/DateInput';
+import { formatDate } from '../utils/dateUtils';
 
 const Assignment = () => {
   const [date, setDate] = useState('');
@@ -85,15 +87,15 @@ const Assignment = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Agent Assignment</h1>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Assignment Date</label>
-        <input
-          type="date"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-          className="mt-1 w-64 rounded-lg border-gray-300 shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-        />
+      
+      <div className="mb-4 flex items-end gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Assignment Date</label>
+          <DateInput selectedDate={date} onChange={setDate} />
+        </div>
+        
       </div>
+
       {date && (
         <>
           <div className="bg-white shadow rounded-lg overflow-x-auto mb-6">
