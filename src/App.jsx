@@ -6,6 +6,9 @@ import Assignment from './pages/Assignment';
 import UploadPage from './pages/UploadPage';
 import SplitPage from './pages/SplitPage';
 import SplitDownload from './pages/SplitDownload';
+import ResultUpload from './pages/ResultUpload';
+import ResultSplit from './pages/ResultSplit';
+import ResultDownload from './pages/ResultDownload';
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/split" element={<SplitPage />} />
           <Route path="/download" element={<SplitDownload />} />
+          <Route path="/result-upload" element={<ResultUpload />} />
+<Route path="/result-split" element={<ResultSplit />} />
+<Route path="/result-download" element={<ResultDownload />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,7 +1,17 @@
 import { useState, useEffect } from 'react';
-import { getSplitsByDate, downloadFile, downloadAgentZip, getLatestOrderDate } from '../api';
+import {
+  getSplitsByDate,
+  downloadFile,
+  downloadAgentZip,
+  getLatestOrderDate,
+} from '../api';
 import { formatDate } from '../utils/dateUtils';
 import DateInput from '../components/DateInput';
+
+// Fixed display order for the lotteries
+const LOTTERY_ORDER = [
+  'ada', 'dana', 'GOVI', 'HADA', 'Jaya', 'Maha', 'mgap', 'SUBA'
+];
 
 const SplitDownload = () => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -9,7 +19,7 @@ const SplitDownload = () => {
   const [splits, setSplits] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // On mount, try to get latest order date (to default date)
+  // On mount, try to get latest order date
   useEffect(() => {
     (async () => {
       try {
@@ -18,7 +28,9 @@ const SplitDownload = () => {
           setSelectedDate(res.data.date);
           loadSplits(res.data.date, agent);
         }
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error(e);
+      }
     })();
   }, []);
 
@@ -31,7 +43,13 @@ const SplitDownload = () => {
     setLoading(true);
     try {
       const res = await getSplitsByDate(agentName, date);
-      setSplits(res.data);
+      // Sort the result according to LOTTERY_ORDER
+      const sorted = [...res.data].sort((a, b) => {
+        const idxA = LOTTERY_ORDER.indexOf(a.lottery_code);
+        const idxB = LOTTERY_ORDER.indexOf(b.lottery_code);
+        return idxA - idxB;
+      });
+      setSplits(sorted);
     } catch (e) {
       console.error(e);
       setSplits([]);
@@ -40,12 +58,12 @@ const SplitDownload = () => {
     }
   };
 
-  const handleDownloadSingle = (filename, sessionId) => {
-    downloadFile(sessionId, filename).then(res => {
+  const handleDownloadSingle = (filename, sessionId, originalFilename) => {
+    downloadFile(sessionId, filename, originalFilename).then(res => {
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const a = document.createElement('a');
       a.href = url;
-      a.download = filename;
+      a.download = originalFilename || filename;
       a.click();
       window.URL.revokeObjectURL(url);
     });
@@ -54,7 +72,7 @@ const SplitDownload = () => {
   const handleDownloadAll = () => {
     if (!window.confirm(`Download all split files for ${agent} on ${formatDate(selectedDate)}?`)) return;
     if (splits.length === 0) return;
-    // Use the first split's session_id to download zip (all splits are from same session)
+    // Use the first split's session_id to download zip
     const sessionId = splits[0].session_id;
     downloadAgentZip(sessionId, agent).then(res => {
       const url = window.URL.createObjectURL(new Blob([res.data]));
@@ -76,7 +94,7 @@ const SplitDownload = () => {
           <DateInput selectedDate={selectedDate} onChange={setSelectedDate} />
         </div>
         <div className="text-sm text-gray-600 self-end mb-1">
-          
+          {selectedDate && `(${formatDate(selectedDate)})`}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Agent</label>
@@ -128,9 +146,17 @@ const SplitDownload = () => {
                   <td className="px-4 py-2">{s.end_serial}</td>
                   <td className="px-4 py-2">{s.record_count}</td>
                   <td className="px-4 py-2">
-                    <button onClick={() => handleDownloadSingle(s.filename, s.session_id)}
-                        className="text-cyan-600 hover:underline">
-                        Download
+                    <button
+                      onClick={() =>
+                        handleDownloadSingle(
+                          s.filename,
+                          s.session_id,
+                          s.original_filename
+                        )
+                      }
+                      className="text-cyan-600 hover:underline"
+                    >
+                      Download
                     </button>
                   </td>
                 </tr>

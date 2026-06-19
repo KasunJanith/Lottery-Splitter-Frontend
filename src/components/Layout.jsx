@@ -18,9 +18,16 @@ const menuItems = [
   { to: '/download', label: 'Download', icon: ArrowDownTrayIcon },
 ];
 
+const resultMenuItems = [
+  { to: '/result-upload', label: 'Upload', icon: CloudArrowUpIcon },
+  { to: '/result-split', label: 'Split', icon: ScissorsIcon },
+  { to: '/result-download', label: 'Download', icon: ArrowDownTrayIcon },
+];
+
 const Layout = () => {
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(true);
+  const [resultDropdownOpen, setResultDropdownOpen] = useState(true);
 
   return (
     <div className="flex min-h-screen">
@@ -28,7 +35,7 @@ const Layout = () => {
         <div className="p-5 text-2xl font-bold border-b border-gray-700">
           DBF Splitter
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {/* Overview Tab */}
           <Link
             to="/overview"
@@ -42,7 +49,7 @@ const Layout = () => {
             Overview
           </Link>
 
-          {/* Dropdown heading */}
+          {/* Upload File Splitter Dropdown */}
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center justify-between w-full px-4 py-3 text-left text-gray-300 hover:bg-gray-800 rounded-lg transition mt-2"
@@ -54,11 +61,40 @@ const Layout = () => {
               <ChevronRightIcon className="h-4 w-4" />
             )}
           </button>
-
-          {/* Dropdown items */}
           {dropdownOpen && (
             <div className="ml-2 space-y-1 border-l border-gray-700 pl-4">
               {menuItems.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`flex items-center px-3 py-2 rounded-lg transition ${
+                    location.pathname === to
+                      ? 'bg-cyan-600 text-white'
+                      : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  }`}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  <span className="text-sm">{label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Result Splitter Dropdown */}
+          <button
+            onClick={() => setResultDropdownOpen(!resultDropdownOpen)}
+            className="flex items-center justify-between w-full px-4 py-3 text-left text-gray-300 hover:bg-gray-800 rounded-lg transition mt-2"
+          >
+            <span className="font-semibold">Result Splitter</span>
+            {resultDropdownOpen ? (
+              <ChevronDownIcon className="h-4 w-4" />
+            ) : (
+              <ChevronRightIcon className="h-4 w-4" />
+            )}
+          </button>
+          {resultDropdownOpen && (
+            <div className="ml-2 space-y-1 border-l border-gray-700 pl-4">
+              {resultMenuItems.map(({ to, label, icon: Icon }) => (
                 <Link
                   key={to}
                   to={to}
