@@ -13,7 +13,7 @@ const Sidebar = () => {
   return (
     <aside className="w-64 bg-gray-900 text-white flex flex-col">
       <div className="p-5 text-2xl font-bold border-b border-gray-700">
-        🎲 DBF Splitter
+         DBF Splitter
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map(({ to, label, icon: Icon }) => (
