@@ -10,7 +10,7 @@ const UploadPage = () => {
   const [sessionId, setSessionId] = useState(null);
   const [lotteries, setLotteries] = useState([]);
   const [error, setError] = useState('');
-
+const LOTTERY_ORDER = ['ada', 'dana', 'govi', 'hada', 'maha', 'mgap', 'jaya', 'suba'];
   // Load latest date & its session on mount
   useEffect(() => {
     (async () => {
@@ -26,22 +26,27 @@ const UploadPage = () => {
     if (selectedDate) loadSession(selectedDate);
   }, [selectedDate]);
 
-  const loadSession = async (date) => {
-    try {
-      const sRes = await getSessionByDate(date);
-      if (sRes.data.session_id) {
-        setSessionId(sRes.data.session_id);
-        const lRes = await getSessionLotteries(sRes.data.session_id);
-        setLotteries(lRes.data);
-      } else {
-        setSessionId(null);
-        setLotteries([]);
-      }
-    } catch {
+const loadSession = async (date) => {
+  try {
+    const sRes = await getSessionByDate(date);
+    if (sRes.data.session_id) {
+      setSessionId(sRes.data.session_id);
+      const lRes = await getSessionLotteries(sRes.data.session_id);
+      const sorted = [...lRes.data].sort((a, b) => {
+        const idxA = LOTTERY_ORDER.indexOf(a.lottery_name.toLowerCase());
+        const idxB = LOTTERY_ORDER.indexOf(b.lottery_name.toLowerCase());
+        return idxA - idxB;
+      });
+      setLotteries(sorted);
+    } else {
       setSessionId(null);
       setLotteries([]);
     }
-  };
+  } catch {
+    setSessionId(null);
+    setLotteries([]);
+  }
+};
 
   const handleUpload = async () => {
     if (!file) return;

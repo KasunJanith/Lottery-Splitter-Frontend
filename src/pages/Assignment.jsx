@@ -8,6 +8,8 @@ const Assignment = () => {
   const [data, setData] = useState([]);
   const [message, setMessage] = useState('');
 
+const LOTTERY_ORDER = ['ada', 'dana', 'govi', 'hada', 'maha', 'mgap', 'jaya', 'suba'];
+
   useEffect(() => {
     (async () => {
       try {
@@ -27,13 +29,18 @@ const Assignment = () => {
   }, [date]);
 
   const loadData = async (d) => {
-    try {
-      const res = await getAssignments(d);
-      setData(res.data);
-    } catch (e) {
-      setData([]);
-    }
-  };
+  try {
+    const res = await getAssignments(d);
+    const sorted = [...res.data].sort((a, b) => {
+      const idxA = LOTTERY_ORDER.indexOf(a.lottery_code.toLowerCase());
+      const idxB = LOTTERY_ORDER.indexOf(b.lottery_code.toLowerCase());
+      return idxA - idxB;
+    });
+    setData(sorted);
+  } catch (e) {
+    setData([]);
+  }
+};
 
   const handleCountChange = (code, agent, val) => {
     setData(prev =>

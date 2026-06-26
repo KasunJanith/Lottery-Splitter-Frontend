@@ -10,7 +10,7 @@ import DateInput from '../components/DateInput';
 
 // Fixed display order for the lotteries
 const LOTTERY_ORDER = [
-  'ada', 'dana', 'GOVI', 'HADA', 'Jaya', 'Maha', 'mgap', 'SUBA'
+  'ada', 'dana', 'GOVI', 'HADA', 'Maha', 'mgap', 'Jaya', 'SUBA'
 ];
 
 const SplitDownload = () => {

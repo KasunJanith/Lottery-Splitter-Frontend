@@ -25,7 +25,7 @@ const SplitPage = () => {
   const [validation, setValidation] = useState(null);
   const [splitting, setSplitting] = useState(false);
   const navigate = useNavigate();
-
+const LOTTERY_ORDER = ['ada', 'dana', 'govi', 'hada', 'maha', 'mgap', 'jaya', 'suba'];
   useEffect(() => {
     (async () => {
       const res = await getLatestOrderDate();
@@ -48,22 +48,27 @@ const SplitPage = () => {
     await Promise.all([loadSession(date), loadValidation(date)]);
   };
 
-  const loadSession = async (date) => {
-    try {
-      const sRes = await getSessionByDate(date);
-      if (sRes.data.session_id) {
-        setSessionId(sRes.data.session_id);
-        const lRes = await getSessionLotteries(sRes.data.session_id);
-        setLotteries(lRes.data);
-      } else {
-        setSessionId(null);
-        setLotteries([]);
-      }
-    } catch {
+const loadSession = async (date) => {
+  try {
+    const sRes = await getSessionByDate(date);
+    if (sRes.data.session_id) {
+      setSessionId(sRes.data.session_id);
+      const lRes = await getSessionLotteries(sRes.data.session_id);
+      const sorted = [...lRes.data].sort((a, b) => {
+        const idxA = LOTTERY_ORDER.indexOf(a.lottery_name.toLowerCase());
+        const idxB = LOTTERY_ORDER.indexOf(b.lottery_name.toLowerCase());
+        return idxA - idxB;
+      });
+      setLotteries(sorted);
+    } else {
       setSessionId(null);
       setLotteries([]);
     }
-  };
+  } catch {
+    setSessionId(null);
+    setLotteries([]);
+  }
+};
 
   const loadValidation = async (date) => {
     try {
@@ -75,13 +80,18 @@ const SplitPage = () => {
   };
 
   const loadAssignedCounts = async (date, agentName) => {
-    try {
-      const res = await getAssignedCounts(agentName, date);
-      setAssignedCounts(res.data);
-    } catch {
-      setAssignedCounts([]);
-    }
-  };
+  try {
+    const res = await getAssignedCounts(agentName, date);
+    const sorted = [...res.data].sort((a, b) => {
+      const idxA = LOTTERY_ORDER.indexOf(a.lottery_code.toLowerCase());
+      const idxB = LOTTERY_ORDER.indexOf(b.lottery_code.toLowerCase());
+      return idxA - idxB;
+    });
+    setAssignedCounts(sorted);
+  } catch {
+    setAssignedCounts([]);
+  }
+};
 
   // Build mismatch lookup from validation
   const getMismatchInfo = (lotteryCode) => {

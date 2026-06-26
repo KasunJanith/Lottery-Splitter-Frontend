@@ -2,16 +2,19 @@ import { useState, useEffect } from 'react';
 import { getOrders, saveOrders, getLatestOrderDate, getDrawNumbers } from '../api';
 import DateInput from '../components/DateInput';
 import { formatDate } from '../utils/dateUtils';
+
 const LOTTERIES = [
   { code: 'ada', name: 'Ada Sampatha' },
   { code: 'dana', name: 'Dhana Nidhanaya' },
-  { code: 'govi', name: 'Govi Setha' },
-  { code: 'hada', name: 'Handahana' },
-  { code: 'jaya', name: 'NLB Jaya' },
-  { code: 'maha', name: 'Mahajana Sampatha' },
+  { code: 'GOVI', name: 'Govi Setha' },
+  { code: 'HADA', name: 'Handahana' },
+  { code: 'Maha', name: 'Mahajana Sampatha' },
   { code: 'mgap', name: 'Mega Power' },
-  { code: 'suba', name: 'Suba Dawasak' },
+  { code: 'Jaya', name: 'NLB Jaya' },
+  { code: 'SUBA', name: 'Suba Dawasak' },
 ];
+
+const LOTTERY_ORDER = ['ada', 'dana', 'govi', 'hada', 'maha', 'mgap', 'jaya', 'suba'];
 
 const OrderEntry = () => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -42,7 +45,13 @@ const OrderEntry = () => {
     setLoading(true);
     try {
       const res = await getOrders(date);
-      setOrders(res.data);
+      // Sort the fetched orders according to LOTTERY_ORDER
+      const sorted = [...res.data].sort((a, b) => {
+        const idxA = LOTTERY_ORDER.indexOf(a.lottery_code.toLowerCase());
+        const idxB = LOTTERY_ORDER.indexOf(b.lottery_code.toLowerCase());
+        return idxA - idxB;
+      });
+      setOrders(sorted);
     } catch (err) {
       setOrders([]);
     } finally {
@@ -101,12 +110,12 @@ const OrderEntry = () => {
     <div>
       <h1 className="text-3xl font-bold mb-6">Order Entry</h1>
       <div className="mb-4 flex items-end gap-4">
-  <div>
-    <label className="block text-sm font-medium text-gray-700">Draw Date</label>
-    <DateInput selectedDate={selectedDate} onChange={setSelectedDate} />
-  </div>
-  
-</div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Draw Date</label>
+          <DateInput selectedDate={selectedDate} onChange={setSelectedDate} />
+        </div>
+        {selectedDate && <div className="text-sm text-gray-600">({formatDate(selectedDate)})</div>}
+      </div>
       {selectedDate && (
         <>
           <button
