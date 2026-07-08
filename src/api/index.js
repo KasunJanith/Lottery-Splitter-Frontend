@@ -1,9 +1,10 @@
 import axios from 'axios';
 const api = axios.create({ baseURL: 'http://localhost:8000/api/v1' });
 
-export const uploadArchive = (file) => {
+export const uploadArchive = (file, date) => {
   const formData = new FormData();
   formData.append('file', file);
+  if (date) formData.append('date', date);
   return api.post('/upload-dbf-archive', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });

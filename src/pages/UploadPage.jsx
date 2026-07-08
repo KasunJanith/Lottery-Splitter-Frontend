@@ -49,23 +49,24 @@ const loadSession = async (date) => {
 };
 
   const handleUpload = async () => {
-    if (!file) return;
-    if (!window.confirm(`Upload ${file.name}?`)) return;
-    setUploading(true);
-    setError('');
-    try {
-      const res = await uploadArchive(file);
-      // Reload session for the current date (uploaded session should match the date)
-      setFile(null);
-      // The uploaded session may have been created with the date from the filename,
-      // so reload to fetch the new session.
-      await loadSession(selectedDate);
-    } catch (e) {
-      setError(e.response?.data?.detail || 'Upload failed');
-    } finally {
-      setUploading(false);
-    }
-  };
+  if (!file) return;
+  if (!selectedDate) {
+    setError('Please select a draw date before uploading.');
+    return;
+  }
+  if (!window.confirm(`Upload ${file.name}?`)) return;
+  setUploading(true);
+  setError('');
+  try {
+    await uploadArchive(file, selectedDate);   // pass the date
+    setFile(null);
+    await loadSession(selectedDate);
+  } catch (e) {
+    setError(e.response?.data?.detail || 'Upload failed');
+  } finally {
+    setUploading(false);
+  }
+};
 
   return (
     <div>
