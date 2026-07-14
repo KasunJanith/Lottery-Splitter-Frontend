@@ -47,7 +47,50 @@ const LOTTERY_ORDER = ['ada', 'dana', 'govi', 'hada', 'maha', 'mgap', 'jaya', 's
   const loadAllData = async (date) => {
     await Promise.all([loadSession(date), loadValidation(date)]);
   };
+// new state
+const [specialSplits, setSpecialSplits] = useState([]);
+const [showSpecialModal, setShowSpecialModal] = useState(false);
+const [specialCounts, setSpecialCounts] = useState({});
+const [specialLabel, setSpecialLabel] = useState('');
 
+// Load special splits when agent/date changes
+useEffect(() => {
+  if (selectedDate && agent && validation?.is_valid) {
+    loadSpecialSplits(selectedDate, agent);
+  }
+}, [selectedDate, agent, validation]);
+
+const loadSpecialSplits = async (date, agentName) => {
+  try {
+    const res = await getSpecialSplits(agentName, date);
+    setSpecialSplits(res.data);
+  } catch { setSpecialSplits([]); }
+};
+
+const handleSpecialSplit = async () => {
+  const counts = assignedCounts.map(a => ({
+    lottery_code: a.lottery_code,
+    count: parseInt(specialCounts[a.lottery_code]) || 0,
+  })).filter(c => c.count > 0);
+  if (counts.length === 0) return alert('Enter at least one count');
+  if (!window.confirm('Create special split?')) return;
+  try {
+    await createSpecialSplit({
+      session_id: sessionId,
+      agent_name: agent,
+      assignment_date: selectedDate,
+      counts: counts,
+      label: specialLabel || undefined
+    });
+    alert('Special split created');
+    setShowSpecialModal(false);
+    setSpecialCounts({});
+    setSpecialLabel('');
+    loadSpecialSplits(selectedDate, agent);
+  } catch (e) {
+    alert(e.response?.data?.detail || 'Error');
+  }
+};
 const loadSession = async (date) => {
   try {
     const sRes = await getSessionByDate(date);
@@ -208,12 +251,11 @@ const loadSession = async (date) => {
             </thead>
             <tbody>
               {lotteries.map((l) => {
-                const mismatch = getMismatchInfo(l.lottery_name);
-                const missing = getMissingInfo(l.lottery_name);
-                const assigned = assignedCounts.find(a => a.lottery_code === l.lottery_name);
-                const orderedQty = assigned?.available_quantity || 0;
-                const isMatch = !mismatch && !missing && orderedQty === l.record_count;
-                
+                const mismatch = getMismatchInfo(l.lottery_name.toLowerCase());
+                const missing = getMissingInfo(l.lottery_name.toLowerCase());
+                const assigned = assignedCounts.find(a => a.lottery_code.toLowerCase() === l.lottery_name.toLowerCase());
+                  const orderedQty = assigned?.available_quantity || 0;
+                  const isMatch = !mismatch && !missing && orderedQty === l.record_count;
                 return (
                   <tr
                     key={l.lottery_name}
@@ -298,7 +340,103 @@ const loadSession = async (date) => {
               </table>
             </div>
           )}
+          {/* Special Splits Section */}
+{validation?.is_valid && assignedCounts.length > 0 && (
+  <div className="mt-8">
+    <h2 className="text-xl font-semibold mb-3">Special Splits</h2>
+    <button
+      onClick={() => setShowSpecialModal(true)}
+      className="mb-4 bg-indigo-600 text-white px-4 py-2 rounded-lg"
+    >
+      + Create Special Split
+    </button>
 
+    {specialSplits.length > 0 && (
+      <div className="bg-white shadow rounded-lg overflow-x-auto mb-6">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-2">Label</th>
+              <th className="px-4 py-2">Lottery</th>
+              <th className="px-4 py-2">Records</th>
+              <th className="px-4 py-2">Start Serial</th>
+              <th className="px-4 py-2">End Serial</th>
+              <th className="px-4 py-2">Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            {specialSplits.map(s => (
+              <tr key={s.id}>
+                <td className="px-4 py-2 font-medium">{s.label}</td>
+                <td className="px-4 py-2">{s.lottery_name}</td>
+                <td className="px-4 py-2">{s.record_count}</td>
+                <td className="px-4 py-2">{s.start_serial}</td>
+                <td className="px-4 py-2">{s.end_serial}</td>
+                <td className="px-4 py-2">
+                  <button
+                    onClick={() => downloadSpecialFile(s.session_id, s.filename).then(res => {
+                      const url = window.URL.createObjectURL(new Blob([res.data]));
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = s.filename;
+                      a.click();
+                    })}
+                    className="text-cyan-600 hover:underline"
+                  >
+                    Download
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+)}
+
+{/* Special Split Modal */}
+{showSpecialModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-6 w-full max-w-lg">
+      <h3 className="text-lg font-bold mb-4">Create Special Split</h3>
+      <div className="mb-4">
+        <label className="block text-sm">Label (optional)</label>
+        <input
+          type="text"
+          value={specialLabel}
+          onChange={e => setSpecialLabel(e.target.value)}
+          className="w-full border rounded-lg p-2"
+          placeholder="e.g., Special Split 1"
+        />
+      </div>
+      <table className="w-full text-sm mb-4">
+        <thead><tr><th>Lottery</th><th>Records to Take</th></tr></thead>
+        <tbody>
+          {assignedCounts.map(a => (
+            <tr key={a.lottery_code}>
+              <td>{a.lottery_name}</td>
+              <td>
+                <input
+                  type="number"
+                  min="0"
+                  max={a.assigned_count}
+                  value={specialCounts[a.lottery_code] || ''}
+                  onChange={e => setSpecialCounts(prev => ({ ...prev, [a.lottery_code]: e.target.value }))}
+                  className="w-20 border rounded p-1"
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="flex justify-end gap-3">
+        <button onClick={() => setShowSpecialModal(false)} className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+        <button onClick={handleSpecialSplit} className="px-4 py-2 bg-indigo-600 text-white rounded">Create</button>
+      </div>
+    </div>
+  </div>
+)}
           {assignedCounts.length > 0 && (
             <button
               onClick={handleSplit}

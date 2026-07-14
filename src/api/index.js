@@ -59,3 +59,12 @@ export const downloadAgentWinningZip = (sessionId, agentName) =>
   api.get('/winning-session-by-date', { params: { date } });
   export const getWinningFilesByDate = (date) =>
   api.get('/winning-files-by-date', { params: { date } });
+
+export const createSpecialSplit = (data) =>
+  api.post('/special-split', data, { headers: { 'Content-Type': 'application/json' } });
+
+export const getSpecialSplits = (agentName, date) =>
+  api.get('/special-splits', { params: { agent_name: agentName, date } });
+
+export const downloadSpecialFile = (sessionId, filename) =>
+  api.get(`/download-special-file/${filename}`, { params: { session: sessionId }, responseType: 'blob' });  
